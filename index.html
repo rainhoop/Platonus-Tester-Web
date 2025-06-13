@@ -102,6 +102,7 @@
       const [finished, setFinished] = React.useState(false);
       const [settings, setSettings] = React.useState({ questionLimit: 0 });
       const [showSettings, setShowSettings] = React.useState(false);
+      const [shuffledVariants, setShuffledVariants] = React.useState([]);
 
       const handleFile = async (files) => {
         const file = files[0];
@@ -126,6 +127,7 @@
         setSelected(null);
         setShowAnswer(false);
         setFinished(false);
+        setShuffledVariants(shuffle(limited[0].variants));
       };
 
       const current = filtered[index];
@@ -147,6 +149,7 @@
           setIndex(index + 1);
           setSelected(null);
           setShowAnswer(false);
+          setShuffledVariants(shuffle(filtered[index + 1].variants));
         } else {
           setFinished(true);
         }
@@ -162,6 +165,7 @@
         setShowAnswer(false);
         setFinished(false);
         setShowSettings(false);
+        setShuffledVariants(shuffle(limited[0].variants));
       };
 
       if (showSettings) {
@@ -204,7 +208,7 @@
           <div className="card">
             <div className="question-text">{current.question}</div>
             {current.image && <img src={current.image} className="question-image" alt=""/>}
-            {current.variants.map((v, i) => (
+            {shuffledVariants.map((v, i) => (
               <div key={i} className={`option ${showAnswer ? (v === current.variants[0] ? 'correct' : (v === selected ? 'incorrect' : '')) : ''}`} onClick={() => handleAnswer(v)}>
                 <input type="radio" checked={selected === v} readOnly />
                 {v}
