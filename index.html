@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Platonus Tester Web</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
+  <style>
+    body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: auto; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .question-text { font-size: 18px; margin-bottom: 15px; }
+    .question-image { max-width: 100%; height: auto; margin-bottom: 10px; }
+    .option { padding: 10px; border: 1px solid #ccc; margin: 5px 0; border-radius: 5px; cursor: pointer; display: flex; align-items: center; }
+    .option.correct { background: #d4edda; border-color: #c3e6cb; }
+    .option.incorrect { background: #f8d7da; border-color: #f5c6cb; }
+    .btn { padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 5px; }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-secondary { background: #ddd; color: black; }
+    .dropzone { border: 2px dashed #aaa; border-radius: 10px; padding: 40px; text-align: center; margin-top: 20px; background: #fafafa; cursor: pointer; }
+    .settings-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+    .settings-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; }
+    .footer { display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function shuffle(array) {
+      return array.map(value => ({ value, sort: Math.random() }))
+                  .sort((a, b) => a.sort - b.sort)
+                  .map(({ value }) => value);
+    }
+
+    function parseQuestions(text) {
+      const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+      const questions = [];
+      let current = null;
+
+      for (let line of lines) {
+        if (line.startsWith('<question>') || line.match(/^\d+\./)) {
+          if (current) questions.push(current);
+          current = { question: line.replace('<question>', '').replace(/^\d+\./, '').trim(), variants: [], comment: '', image: null };
+        } else if (line.startsWith('<variant>') && current) {
+          current.variants.push(line.replace('<variant>', '').trim());
+        } else if (line.startsWith('<comment>') && current) {
+          current.comment = line.replace('<comment>', '').trim();
+        } else if (line.startsWith('<#picture=') && current) {
+          const match = line.match(/<#picture=(.*?)#>/);
+          if (match) current.image = match[1];
+        }
+      }
+
+      if (current) questions.push(current);
+      return questions;
+    }
+
+    function Dropzone({ onFilesAdded }) {
+      return (
+        <div className="dropzone" onClick={() => document.getElementById('fileInput').click()}>
+          <p>Кликните или перетащите файл .docx/.txt</p>
+          <input type="file" id="fileInput" style={{ display: 'none' }} accept=".docx,.txt" onChange={(e) => onFilesAdded(e.target.files)} />
+        </div>
+      );
+    }
+
+    function SettingsModal({ settings, onSave, onClose, onReset }) {
+      const [localSettings, setLocalSettings] = React.useState(settings);
+
+      const handleChange = e => setLocalSettings({ ...localSettings, questionLimit: parseInt(e.target.value || 0) });
+
+      return (
+        <div className="settings-modal">
+          <div className="settings-content">
+            <h3>Настройки</h3>
+            <label>
+              Лимит вопросов:
+              <input type="number" min="0" value={localSettings.questionLimit} onChange={handleChange} style={{ marginLeft: '10px' }}/>
+            </label>
+            <div style={{ marginTop: '20px', textAlign: 'right' }}>
+              <button className="btn btn-secondary" onClick={onReset}>Начать заново</button>
+              <button className="btn btn-secondary" onClick={onClose}>Отмена</button>
+              <button className="btn btn-primary" onClick={() => onSave(localSettings)}>Сохранить</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [questions, setQuestions] = React.useState([]);
+      const [filtered, setFiltered] = React.useState([]);
+      const [index, setIndex] = React.useState(0);
+      const [selected, setSelected] = React.useState(null);
+      const [showAnswer, setShowAnswer] = React.useState(false);
+      const [score, setScore] = React.useState(0);
+      const [finished, setFinished] = React.useState(false);
+      const [settings, setSettings] = React.useState({ questionLimit: 0 });
+      const [showSettings, setShowSettings] = React.useState(false);
+
+      const handleFile = async (files) => {
+        const file = files[0];
+        let text = '';
+        if (file.name.endsWith('.docx')) {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          text = result.value;
+        } else {
+          text = await file.text();
+        }
+
+        let parsed = parseQuestions(text);
+        parsed = parsed.filter(q => q.variants.length > 0);
+
+        const randomized = shuffle(parsed);
+        const limited = settings.questionLimit > 0 ? randomized.slice(0, settings.questionLimit) : randomized;
+        setQuestions(parsed);
+        setFiltered(limited);
+        setIndex(0);
+        setScore(0);
+        setSelected(null);
+        setShowAnswer(false);
+        setFinished(false);
+      };
+
+      const current = filtered[index];
+
+      const handleAnswer = (v) => {
+        if (showAnswer) return;
+        setSelected(v);
+      };
+
+      const checkAnswer = () => {
+        setShowAnswer(true);
+        if (selected === current.variants[0]) {
+          setScore(score + 1);
+        }
+      };
+
+      const next = () => {
+        if (index + 1 < filtered.length) {
+          setIndex(index + 1);
+          setSelected(null);
+          setShowAnswer(false);
+        } else {
+          setFinished(true);
+        }
+      };
+
+      const restart = () => {
+        const randomized = shuffle(questions);
+        const limited = settings.questionLimit > 0 ? randomized.slice(0, settings.questionLimit) : randomized;
+        setFiltered(limited);
+        setIndex(0);
+        setScore(0);
+        setSelected(null);
+        setShowAnswer(false);
+        setFinished(false);
+        setShowSettings(false);
+      };
+
+      if (showSettings) {
+        return <SettingsModal settings={settings} onSave={(s) => { setSettings(s); restart(); }} onClose={() => setShowSettings(false)} onReset={restart} />;
+      }
+
+      if (!filtered.length) {
+        return (
+          <div className="container">
+            <div className="header">
+              <h2>Platonus Tester Web</h2>
+              <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>⚙️</button>
+            </div>
+            <Dropzone onFilesAdded={handleFile} />
+          </div>
+        );
+      }
+
+      if (finished) {
+        return (
+          <div className="container">
+            <div className="header">
+              <h2>Тест завершён</h2>
+              <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>⚙️</button>
+            </div>
+            <div className="card">
+              <p>Ваш результат: {score} из {filtered.length} ({Math.round(score / filtered.length * 100)}%)</p>
+              <button className="btn btn-primary" onClick={restart}>Начать заново</button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="container">
+          <div className="header">
+            <h2>Platonus Tester Web</h2>
+            <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>⚙️</button>
+          </div>
+          <div className="card">
+            <div className="question-text">{current.question}</div>
+            {current.image && <img src={current.image} className="question-image" alt=""/>}
+            {current.variants.map((v, i) => (
+              <div key={i} className={`option ${showAnswer ? (v === current.variants[0] ? 'correct' : (v === selected ? 'incorrect' : '')) : ''}`} onClick={() => handleAnswer(v)}>
+                <input type="radio" checked={selected === v} readOnly />
+                {v}
+              </div>
+            ))}
+            <div>
+              {!showAnswer ? (
+                <button className="btn btn-primary" onClick={checkAnswer} disabled={!selected}>Проверить</button>
+              ) : (
+                <button className="btn btn-primary" onClick={next}>Следующий</button>
+              )}
+            </div>
+            <div className="footer">
+              <span>Вопрос {index + 1} из {filtered.length}</span>
+              <span>Лимит: {settings.questionLimit || 'без ограничений'}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
