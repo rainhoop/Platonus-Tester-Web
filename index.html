@@ -198,10 +198,22 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
+    // Функция перемешивания массива
     function shuffle(array) {
-      return array.map(value => ({ value, sort: Math.random() }))
-                  .sort((a, b) => a.sort - b.sort)
-                  .map(({ value }) => value);
+      return array
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+    }
+
+    // Для перемешивания и запоминания правильного ответа
+    function shuffleVariants(variants) {
+      // Первый вариант всегда правильный
+      const correct = variants[0];
+      const shuffled = shuffle(variants);
+      // индекс правильного ответа в перемешанном массиве
+      const correctIndex = shuffled.indexOf(correct);
+      return { shuffled, correctIndex };
     }
 
     async function parseDocx(file) {
@@ -274,7 +286,7 @@
 
     function App() {
       // state
-      const [questions, setQuestions] = React.useState([]);
+      const [questions, setQuestions] = React.useState([]); // [{question, variants, correctIndex, shuffledVariants}]
       const [filtered, setFiltered] = React.useState([]);
       const [index, setIndex] = React.useState(0);
       const [selected, setSelected] = React.useState(null);
@@ -287,6 +299,22 @@
 
       // текущий вопрос
       const current = filtered[index];
+
+      // перемешать вопросы и варианты (ответов)
+      function buildQuestions(rawQuestions) {
+        // перемешиваем вопросы
+        const shuffledQuestions = shuffle(rawQuestions);
+        // для каждого вопроса перемешиваем варианты, запоминаем индекс правильного
+        return shuffledQuestions.map(q => {
+          const { shuffled, correctIndex } = shuffleVariants(q.variants);
+          return {
+            ...q,
+            shuffledVariants: shuffled,
+            correctIndex,
+            // image, question, comment копируются как есть
+          };
+        });
+      }
 
       const handleFile = async (files) => {
         setError('');
@@ -311,9 +339,9 @@
             return;
           }
           const lim = parseInt(questionLimit || 0);
-          let randomized = shuffle(parsed);
-          let limited = (lim > 0 && lim < randomized.length) ? randomized.slice(0, lim) : randomized;
-          setQuestions(parsed);
+          let built = buildQuestions(parsed);
+          let limited = (lim > 0 && lim < built.length) ? built.slice(0, lim) : built;
+          setQuestions(built);
           setFiltered(limited);
           setIndex(0);
           setScore(0);
@@ -327,14 +355,14 @@
         setFileLoading(false);
       };
 
-      const handleAnswer = (v) => {
+      const handleAnswer = (i) => {
         if (showAnswer) return;
-        setSelected(v);
+        setSelected(i);
       };
 
       const checkAnswer = () => {
         setShowAnswer(true);
-        if (selected === current.variants[0]) {
+        if (selected === current.correctIndex) {
           setScore(score + 1);
         }
       };
@@ -351,8 +379,9 @@
 
       const restart = () => {
         const lim = parseInt(questionLimit || 0);
-        let randomized = shuffle(questions);
-        let limited = (lim > 0 && lim < randomized.length) ? randomized.slice(0, lim) : randomized;
+        // перемешиваем только вопросы, чтобы при перезапуске порядок был новый
+        let built = buildQuestions(questions);
+        let limited = (lim > 0 && lim < built.length) ? built.slice(0, lim) : built;
         setFiltered(limited);
         setIndex(0);
         setScore(0);
@@ -441,15 +470,26 @@
           <div className="card">
             <div className="question-text">{current.question}</div>
             {current.image && <img src={current.image} className="question-image" alt=""/>}
-            {current.variants.map((v, i) => (
-              <div key={i} className={`option ${showAnswer ? (v === current.variants[0] ? 'correct' : (v === selected ? 'incorrect' : '')) : ''}`} onClick={() => handleAnswer(v)}>
-                <input type="radio" checked={selected === v} readOnly />
+            {current.shuffledVariants.map((v, i) => (
+              <div key={i}
+                   className={
+                     "option " +
+                     (showAnswer
+                       ? (i === current.correctIndex
+                           ? "correct"
+                           : (i === selected ? "incorrect" : ""))
+                       : (i === selected ? "selected" : "")
+                     )
+                   }
+                   onClick={() => handleAnswer(i)}
+              >
+                <input type="radio" checked={selected === i} readOnly />
                 {v}
               </div>
             ))}
             <div>
               {!showAnswer ? (
-                <button className="btn btn-primary" onClick={checkAnswer} disabled={!selected}>Проверить</button>
+                <button className="btn btn-primary" onClick={checkAnswer} disabled={selected === null}>Проверить</button>
               ) : (
                 <button className="btn btn-primary" onClick={next}>Следующий</button>
               )}
