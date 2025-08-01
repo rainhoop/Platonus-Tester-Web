@@ -23,7 +23,7 @@
 
 ## Запуск
 
-`https://rainhoop.github.io/Platonus-Tester-Web/`
+https://rainhoop.github.io/Platonus-Tester-Web/
 
 ---
 
