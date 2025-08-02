@@ -10,195 +10,127 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
   <style>
     html, body {
-      height: 100%;
       margin: 0;
       padding: 0;
+      font-family: Arial, sans-serif;
       background: #f5f5f5;
-      font-family: Arial, sans-serif;
-    }
-    body {
-      min-height: 100vh;
-      min-width: 100vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
     }
     #root {
-      flex: 1 0 auto;
-      width: 100vw;
       display: flex;
       justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      padding: 30px 15px;
     }
     .container {
-      max-width: 520px;
       width: 100%;
-      background: none;
-      margin: auto;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transform: scale(1.12);
-      font-family: Arial, sans-serif;
+      max-width: 390px;
     }
     .header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      margin-bottom: 14px;
-    }
-    .github-link {
-      margin-bottom: 7px;
-      margin-top: 0;
       text-align: center;
+      margin-bottom: 16px;
     }
     .github-link a {
-      color: #2563eb;
-      font-size: 15px;
+      font-size: 14px;
       text-decoration: none;
-      font-weight: normal;
-      font-family: Arial, sans-serif;
-      transition: color .13s;
+      color: #2563eb;
     }
-    .github-link a:hover { color: #0036c1; }
     .platonus-title {
-      font-size: 2.1em;
-      margin: 0 0 0 0;
-      font-weight: 700;
-      font-family: Arial, sans-serif;
-      letter-spacing: 0;
-      color: #232323;
-      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 4px 0;
     }
     .card {
       background: white;
-      border-radius: 12px;
-      padding: 34px 32px 28px 32px;
-      margin-top: 0;
-      box-shadow: 0 5px 20px #0001;
-      width: 100%;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      font-family: Arial, sans-serif;
+      padding: 22px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #0001;
     }
     .question-text {
-      font-size: 1.23em;
-      margin-bottom: 22px;
+      font-size: 1.1em;
+      margin-bottom: 12px;
       font-weight: 600;
-      text-align: center;
+      text-align: left;
     }
     .question-image {
-      max-width: 98%;
-      height: auto;
+      max-width: 100%;
+      margin: 0 auto 10px;
       display: block;
-      margin: 0 auto 18px auto;
-      border-radius: 10px;
+      border-radius: 8px;
     }
     .option {
-      padding: 14px 14px;
-      border: 1.5px solid #e5e7eb;
-      margin: 9px 0;
-      border-radius: 9px;
+      background: #f8fafd;
+      border: 1.2px solid #e5e7eb;
+      padding: 8px 10px;
+      border-radius: 6px;
       cursor: pointer;
+      margin: 6px 0;
       display: flex;
       align-items: center;
-      font-size: 1.11em;
-      transition: background .13s, border .13s;
-      background: #f8fafd;
-      font-weight: 500;
-      font-family: Arial, sans-serif;
+      font-size: 1em;
     }
-    .option input { margin-right: 12px; }
-    .option.correct { background: #f0fdf4; border-color: #10b981; color: #15803d; }
-    .option.incorrect { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+    .option.correct {
+      background: #f0fdf4;
+      border-color: #10b981;
+      color: #15803d;
+    }
+    .option.incorrect {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
     .btn {
-      padding: 13px 26px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1em;
       border: none;
-      border-radius: 7px;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 8px 10px 0 0;
-      font-size: 1.07em;
-      font-family: Arial, sans-serif;
     }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-secondary { background: #f1f5f9; color: #222; }
-    .btn:disabled { background: #e5e7eb; color: #aaa; cursor: not-allowed; }
-    .dropzone {
-      border: 2.5px dashed #94a3b8;
-      border-radius: 12px;
-      padding: 52px 0;
-      text-align: center;
-      margin-top: 38px;
-      background: #fafafa;
-      cursor: pointer;
-      color: #64748b;
-      font-size: 1.17em;
-      transition: border .15s;
-      font-family: Arial, sans-serif;
+    .btn-primary {
+      background: #2563eb;
+      color: white;
     }
-    .dropzone:hover { border-color: #2563eb; color: #2563eb;}
+    .button-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+    }
     .footer {
       display: flex;
       justify-content: space-between;
-      margin-top: 18px;
-      font-size: 1.12em;
-      color: #888;
-      font-weight: 400;
-      font-family: Arial, sans-serif;
+      margin-top: 14px;
+      font-size: 0.95em;
+      color: #777;
+    }
+    .dropzone {
+      border: 2px dashed #94a3b8;
+      padding: 30px 10px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      color: #64748b;
+    }
+    .dropzone:hover {
+      border-color: #2563eb;
+      color: #2563eb;
     }
     .question-limit-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      margin: 32px 0 0 0;
-      font-size: 1.12em;
-      font-family: Arial, sans-serif;
-    }
-    .question-limit-row label { font-size: 1em; }
-    .question-limit-row input[type=number] {
-      width: 80px;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1.5px solid #e5e7eb;
-      font-size: 1em;
-      font-weight: 500;
-      font-family: Arial, sans-serif;
+      gap: 10px;
+      margin-top: 20px;
     }
     .error {
       color: #e11d48;
       text-align: center;
-      margin: 22px 0 0 0;
-      min-height: 24px;
-      font-size: 1.05em;
-      font-family: Arial, sans-serif;
-    }
-    @media (max-width: 700px) {
-      .container { max-width: 98vw; transform: scale(1); }
-      .card { padding: 18px 4vw 18px 4vw; }
-      .platonus-title { font-size: 1.28em; }
-    }
-    @media (max-width: 420px) {
-      .card { padding: 10px 0; }
-      .question-limit-row { flex-direction: column; gap: 2px; margin-top: 18px; }
-      .footer { font-size: 0.98em; }
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    // Функция перемешивания массива
     function shuffle(array) {
       return array
         .map(value => ({ value, sort: Math.random() }))
@@ -206,12 +138,9 @@
         .map(({ value }) => value);
     }
 
-    // Для перемешивания и запоминания правильного ответа
     function shuffleVariants(variants) {
-      // Первый вариант всегда правильный
       const correct = variants[0];
       const shuffled = shuffle(variants);
-      // индекс правильного ответа в перемешанном массиве
       const correctIndex = shuffled.indexOf(correct);
       return { shuffled, correctIndex };
     }
@@ -220,30 +149,28 @@
       const arrayBuffer = await file.arrayBuffer();
       let imageMap = {};
       const options = {
-        convertImage: mammoth.images.inline(function(image) {
-          return image.read('base64').then(base64 => {
-            imageMap[image.altText || image.src || 'img'+Math.random()] = "data:" + image.contentType + ";base64," + base64;
+        convertImage: mammoth.images.inline(image =>
+          image.read('base64').then(base64 => {
+            imageMap[image.altText || image.src || 'img'+Math.random()] =
+              "data:" + image.contentType + ";base64," + base64;
             return "";
-          });
-        }),
+          })
+        )
       };
       const result = await mammoth.extractRawText({ arrayBuffer }, options);
       return { text: result.value, images: imageMap };
     }
 
     function parseQuestions(text, images) {
-      const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const questions = [];
       let current = null;
-
       for (let line of lines) {
         if (line.startsWith('<question>') || line.match(/^\d+\./)) {
           if (current) questions.push(current);
-          current = { question: line.replace('<question>', '').replace(/^\d+\./, '').trim(), variants: [], comment: '', image: null };
+          current = { question: line.replace('<question>', '').replace(/^\d+\./, '').trim(), variants: [], image: null };
         } else if (line.startsWith('<variant>') && current) {
           current.variants.push(line.replace('<variant>', '').trim());
-        } else if (line.startsWith('<comment>') && current) {
-          current.comment = line.replace('<comment>', '').trim();
         } else if (line.startsWith('<#picture=') && current) {
           const match = line.match(/<#picture=([^#>]+)#>/);
           if (match && images) {
@@ -261,15 +188,13 @@
       const fileRef = React.useRef();
       const onDrop = e => {
         e.preventDefault();
-        e.stopPropagation();
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          onFilesAdded(e.dataTransfer.files);
-        }
+        if (e.dataTransfer.files?.length) onFilesAdded(e.dataTransfer.files);
       };
       return (
-        <div className="dropzone"
+        <div
+          className="dropzone"
           onClick={() => fileRef.current.click()}
-          onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+          onDragOver={e => e.preventDefault()}
           onDrop={onDrop}
         >
           <input
@@ -279,14 +204,13 @@
             accept=".docx,.txt"
             onChange={e => onFilesAdded(e.target.files)}
           />
-          <p>Кликните или перетащите файл .docx/.txt</p>
+          <p>Кликните или перетащите .docx/.txt файл</p>
         </div>
       );
     }
 
     function App() {
-      // state
-      const [questions, setQuestions] = React.useState([]); // [{question, variants, correctIndex, shuffledVariants}]
+      const [questions, setQuestions] = React.useState([]);
       const [filtered, setFiltered] = React.useState([]);
       const [index, setIndex] = React.useState(0);
       const [selected, setSelected] = React.useState(null);
@@ -295,24 +219,14 @@
       const [finished, setFinished] = React.useState(false);
       const [questionLimit, setQuestionLimit] = React.useState('');
       const [error, setError] = React.useState('');
-      const [fileLoading, setFileLoading] = React.useState(false);
 
-      // текущий вопрос
       const current = filtered[index];
 
-      // перемешать вопросы и варианты (ответов)
-      function buildQuestions(rawQuestions) {
-        // перемешиваем вопросы
-        const shuffledQuestions = shuffle(rawQuestions);
-        // для каждого вопроса перемешиваем варианты, запоминаем индекс правильного
-        return shuffledQuestions.map(q => {
-          const { shuffled, correctIndex } = shuffleVariants(q.variants);
-          return {
-            ...q,
-            shuffledVariants: shuffled,
-            correctIndex,
-            // image, question, comment копируются как есть
-          };
+      function buildQuestions(raw) {
+        const shuffled = shuffle(raw);
+        return shuffled.map(q => {
+          const { shuffled: sv, correctIndex } = shuffleVariants(q.variants);
+          return { ...q, shuffledVariants: sv, correctIndex };
         });
       }
 
@@ -320,27 +234,20 @@
         setError('');
         const file = files[0];
         if (!file) return;
-        setFileLoading(true);
         try {
-          let text = '';
-          let images = {};
+          let text = '', images = {};
           if (file.name.endsWith('.docx')) {
-            const res = await parseDocx(file);
-            text = res.text;
-            images = res.images;
+            const result = await parseDocx(file);
+            text = result.text;
+            images = result.images;
           } else {
             text = await file.text();
           }
-          let parsed = parseQuestions(text, images);
-          parsed = parsed.filter(q => q.variants.length > 0);
-          if (!parsed.length) {
-            setError('Вопросы не найдены!');
-            setFileLoading(false);
-            return;
-          }
+          const parsed = parseQuestions(text, images).filter(q => q.variants.length > 0);
+          if (!parsed.length) return setError('Вопросы не найдены!');
           const lim = parseInt(questionLimit || 0);
-          let built = buildQuestions(parsed);
-          let limited = (lim > 0 && lim < built.length) ? built.slice(0, lim) : built;
+          const built = buildQuestions(parsed);
+          const limited = lim > 0 && lim < built.length ? built.slice(0, lim) : built;
           setQuestions(built);
           setFiltered(limited);
           setIndex(0);
@@ -348,16 +255,9 @@
           setSelected(null);
           setShowAnswer(false);
           setFinished(false);
-          setError('');
         } catch (e) {
-          setError('Ошибка разбора файла: ' + (e?.message || e));
+          setError('Ошибка: ' + (e.message || e));
         }
-        setFileLoading(false);
-      };
-
-      const handleAnswer = (i) => {
-        if (showAnswer) return;
-        setSelected(i);
       };
 
       const checkAnswer = () => {
@@ -379,9 +279,8 @@
 
       const restart = () => {
         const lim = parseInt(questionLimit || 0);
-        // перемешиваем только вопросы, чтобы при перезапуске порядок был новый
-        let built = buildQuestions(questions);
-        let limited = (lim > 0 && lim < built.length) ? built.slice(0, lim) : built;
+        const built = buildQuestions(questions);
+        const limited = lim > 0 && lim < built.length ? built.slice(0, lim) : built;
         setFiltered(limited);
         setIndex(0);
         setScore(0);
@@ -390,47 +289,27 @@
         setFinished(false);
       };
 
-      const goToStart = () => {
-        setQuestions([]);
-        setFiltered([]);
-        setIndex(0);
-        setScore(0);
-        setSelected(null);
-        setShowAnswer(false);
-        setFinished(false);
-        setError('');
-      };
-
       if (!filtered.length) {
         return (
           <div className="container">
             <div className="header">
               <div className="github-link">
-                <a href="https://github.com/rainhoop/Platonus-Tester-Web" target="_blank" rel="noopener noreferrer">
-                  GitHub
-                </a>
+                <a href="https://github.com/rainhoop/Platonus-Tester-Web" target="_blank">GitHub</a>
               </div>
-              <div className="platonus-title">Platonus Tester Web</div>
+              <h1 className="platonus-title">Platonus Tester Web</h1>
             </div>
             <div className="card">
               <Dropzone onFilesAdded={handleFile} />
               <div className="question-limit-row">
-                <label htmlFor="limitInput">Количество вопросов:</label>
+                <label>Количество вопросов:</label>
                 <input
-                  id="limitInput"
                   type="number"
                   min="0"
                   placeholder="Все"
                   value={questionLimit}
-                  onChange={e => {
-                    let v = e.target.value.replace(/^0+/, '');
-                    if (v === '') v = '';
-                    setQuestionLimit(v.replace(/[^\d]/g, ''));
-                  }}
-                  disabled={fileLoading}
+                  onChange={e => setQuestionLimit(e.target.value.replace(/[^\d]/g, ''))}
                 />
               </div>
-              {fileLoading && <div style={{textAlign:'center', margin:'16px 0 0 0', color:'#2563eb'}}>Загрузка...</div>}
               {error && <div className="error">{error}</div>}
             </div>
           </div>
@@ -441,17 +320,11 @@
         return (
           <div className="container">
             <div className="header">
-              <div className="github-link">
-                <a href="https://github.com/rainhoop/Platonus-Tester-Web" target="_blank" rel="noopener noreferrer">
-                  GitHub
-                </a>
-              </div>
-              <div className="platonus-title">Platonus Tester Web</div>
+              <h1 className="platonus-title">Platonus Tester Web</h1>
             </div>
             <div className="card">
-              <p>Ваш результат: {score} из {filtered.length} ({Math.round(score / filtered.length * 100)}%)</p>
+              <p>Результат: {score} из {filtered.length} ({Math.round(score / filtered.length * 100)}%)</p>
               <button className="btn btn-primary" onClick={restart}>Пройти заново</button>
-              <button className="btn btn-secondary" onClick={goToStart} style={{marginTop:8}}>⟵ Новый файл</button>
             </div>
           </div>
         );
@@ -460,38 +333,38 @@
       return (
         <div className="container">
           <div className="header">
-            <div className="github-link">
-              <a href="https://github.com/rainhoop/Platonus-Tester-Web" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
-            </div>
-            <div className="platonus-title">Platonus Tester Web</div>
+            <h1 className="platonus-title">Platonus Tester Web</h1>
           </div>
           <div className="card">
             <div className="question-text">{current.question}</div>
-            {current.image && <img src={current.image} className="question-image" alt=""/>}
+            {current.image && <img src={current.image} className="question-image" alt="" />}
             {current.shuffledVariants.map((v, i) => (
-              <div key={i}
-                   className={
-                     "option " +
-                     (showAnswer
-                       ? (i === current.correctIndex
-                           ? "correct"
-                           : (i === selected ? "incorrect" : ""))
-                       : (i === selected ? "selected" : "")
-                     )
-                   }
-                   onClick={() => handleAnswer(i)}
+              <div
+                key={i}
+                className={
+                  "option " +
+                  (showAnswer
+                    ? (i === current.correctIndex
+                        ? "correct"
+                        : (i === selected ? "incorrect" : ""))
+                    : (i === selected ? "selected" : "")
+                  )
+                }
+                onClick={() => !showAnswer && setSelected(i)}
               >
                 <input type="radio" checked={selected === i} readOnly />
                 {v}
               </div>
             ))}
-            <div>
+            <div className="button-row">
               {!showAnswer ? (
-                <button className="btn btn-primary" onClick={checkAnswer} disabled={selected === null}>Проверить</button>
+                <button className="btn btn-primary" onClick={checkAnswer} disabled={selected === null}>
+                  Проверить
+                </button>
               ) : (
-                <button className="btn btn-primary" onClick={next}>Следующий</button>
+                <button className="btn btn-primary" onClick={next}>
+                  Следующий
+                </button>
               )}
             </div>
             <div className="footer">
@@ -503,7 +376,7 @@
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
+    const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<App />);
   </script>
 </body>
