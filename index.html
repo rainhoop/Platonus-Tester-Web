@@ -27,6 +27,12 @@
     .header {
       text-align: center;
       margin-bottom: 16px;
+      position: relative;
+    }
+    .header-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
     }
     .github-link a {
       font-size: 14px;
@@ -89,9 +95,22 @@
       background: #2563eb;
       color: white;
     }
+    .btn-timer {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-finish {
+      background: #fff0f0;
+      color: #b91c1c;
+      border: 1px solid #b91c1c;
+    }
+    .btn-back {
+      background: #f1f5f9;
+      color: #334155;
+    }
     .button-row {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       margin-top: 14px;
     }
     .footer {
@@ -125,6 +144,11 @@
       color: #e11d48;
       text-align: center;
       margin-top: 10px;
+    }
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
     }
   </style>
 </head>
@@ -209,6 +233,12 @@
       );
     }
 
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
     function App() {
       const [questions, setQuestions] = React.useState([]);
       const [filtered, setFiltered] = React.useState([]);
@@ -219,8 +249,20 @@
       const [finished, setFinished] = React.useState(false);
       const [questionLimit, setQuestionLimit] = React.useState('');
       const [error, setError] = React.useState('');
+      const [time, setTime] = React.useState(0);
+      const [timerActive, setTimerActive] = React.useState(false);
 
       const current = filtered[index];
+
+      React.useEffect(() => {
+        let interval;
+        if (timerActive) {
+          interval = setInterval(() => {
+            setTime(prevTime => prevTime + 1);
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [timerActive]);
 
       function buildQuestions(raw) {
         const shuffled = shuffle(raw);
@@ -255,6 +297,8 @@
           setSelected(null);
           setShowAnswer(false);
           setFinished(false);
+          setTime(0);
+          setTimerActive(true);
         } catch (e) {
           setError('Ошибка: ' + (e.message || e));
         }
@@ -273,8 +317,13 @@
           setSelected(null);
           setShowAnswer(false);
         } else {
-          setFinished(true);
+          finishTest();
         }
+      };
+
+      const finishTest = () => {
+        setTimerActive(false);
+        setFinished(true);
       };
 
       const restart = () => {
@@ -287,6 +336,21 @@
         setSelected(null);
         setShowAnswer(false);
         setFinished(false);
+        setTime(0);
+        setTimerActive(true);
+      };
+
+      const resetTest = () => {
+        setQuestions([]);
+        setFiltered([]);
+        setIndex(0);
+        setScore(0);
+        setSelected(null);
+        setShowAnswer(false);
+        setFinished(false);
+        setTime(0);
+        setTimerActive(false);
+        setQuestionLimit('');
       };
 
       if (!filtered.length) {
@@ -323,8 +387,16 @@
               <h1 className="platonus-title">Platonus Tester Web</h1>
             </div>
             <div className="card">
+              <p>Время выполнения: {formatTime(time)}</p>
               <p>Результат: {score} из {filtered.length} ({Math.round(score / filtered.length * 100)}%)</p>
-              <button className="btn btn-primary" onClick={restart}>Пройти заново</button>
+              <div className="buttons-container">
+                <button className="btn btn-back" onClick={resetTest}>
+                  Загрузить новый тест
+                </button>
+                <button className="btn btn-primary" onClick={restart}>
+                  Пройти заново
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -334,6 +406,12 @@
         <div className="container">
           <div className="header">
             <h1 className="platonus-title">Platonus Tester Web</h1>
+            <div className="header-controls">
+              <div className="btn btn-timer">{formatTime(time)}</div>
+              <button className="btn btn-finish" onClick={finishTest}>
+                Завершить тест
+              </button>
+            </div>
           </div>
           <div className="card">
             <div className="question-text">{current.question}</div>
